@@ -25,7 +25,7 @@ class Hammer:
         self.height = height
         self.width = width
         self.image = transform.scale(image, (self.height, self.width))
-
+        self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect(topleft = starting_position)
         self.rotation = 90 #90 is vertical
 
@@ -45,5 +45,4 @@ class Hammer:
     
     def draw_hammer(self, surface):
     	display_hammer = transform.rotate(self.image, self.rotation)
-
         surface.blit(display_hammer, self.rect)
