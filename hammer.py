@@ -28,22 +28,26 @@ class Hammer:
 
         self.rect = self.image.get_rect(topleft = starting_position)
         self.rotation = 90 #90 is vertical
+        
+        self.collision_rect = self.rect
 
     def update_position(self):
         self.y += self.y_velocity        
         speed = [0, self.y_velocity]
         self.rect = self.rect.move(speed)
-    	self.rotation += self.rotation_increment * self.x_direction
-    	if abs(self.rotation - self.start_rotation) > self.max_rotation:
-        	self.x_direction *= -1
-    	if self.rotation < self.start_rotation:
-			if self.x_direction == -1:
-				self.x -= 1.5
-			if self.x_direction == 1:
-				self.x += 1.5
+        self.rotation += self.rotation_increment * self.x_direction
+        if abs(self.rotation - self.start_rotation) > self.max_rotation:
+            self.x_direction *= -1
+        if self.rotation < self.start_rotation:
+            if self.x_direction == -1:
+                self.x -= 1.5
+            if self.x_direction == 1:
+                self.x += 1.5
     	self.rect.topleft = ( self.x, self.y)
     
     def draw_hammer(self, surface):
-    	display_hammer = transform.rotate(self.image, self.rotation)
-
+        display_hammer = transform.rotate(self.image, self.rotation)
+        self.collision_rect = display_hammer.get_rect(topleft=self.rect.topleft)
+        
         surface.blit(display_hammer, self.rect)
+        #pygame.draw.rect(surface, (255,0,0), self.collision_rect)

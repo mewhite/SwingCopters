@@ -27,8 +27,6 @@ class SwingCopters:
     wall_range = (int(-.9 * wall_width), int(screen_width - wall_gap_size - 1.1 * wall_width))
     #wall_range = (int(-.8 * wall_width), int(screen_width - .8 * wall_width - wall_gap_size))
     #wall_range = (0, 0 )
-
-    print "Range: " + str(wall_range)
     
     def __init__(self):
         self.num_walls = 0
@@ -45,7 +43,7 @@ class SwingCopters:
         
     def create_walls(self):
         wall_x = random.randint(SwingCopters.wall_range[0], SwingCopters.wall_range[1])
-        print wall_x
+
         wall_position1 = (wall_x, 0)
         wall_position2 = (wall_x + SwingCopters.wall_width + SwingCopters.wall_gap_size, 0)
         
@@ -98,7 +96,6 @@ class SwingCopters:
         pygame.display.flip()
 
     def detect_collision(self):
-        return False
         p_rect = self.player.player_rect
         if p_rect.left < 0 or p_rect.right > SwingCopters.screen_width:
             return True
@@ -106,6 +103,11 @@ class SwingCopters:
         for wall in self.walls:
             if p_rect.colliderect(wall.rect):
                 return True
+                
+        for hammer in self.hammers:
+            if p_rect.colliderect(hammer.collision_rect):
+                return True
+                
         return False
 
         
@@ -122,6 +124,7 @@ class SwingCopters:
     def restart(self):
         self.player = Player(SwingCopters.player_start_pos, 0, 0)
         self.walls = deque()
+        self.hammers = deque()
         self.num_walls = 0
     
     def run_game(self):
