@@ -16,22 +16,15 @@ def elementwise_add(list1, list2):
 pygame.init()
 
 size = width, height = 800, 600
-start_pos = (width / 2, height / 2)
-speed = [0, 0]
-accel = 0
-space_accel = 0.1
 black = 255, 255, 255
 screen = pygame.display.set_mode(size)
+
 hammer = pygame.image.load("rectangle.png")
 hammer = transform.scale(hammer, (70, 10))
+start_pos = (width / 2 - 10, height / 5)
 
 hammerrect = hammer.get_rect(center=start_pos)
-#hammerrect = hammer.get_rect(topleft = ( 2, width / 2 - 50) ,
-#    topright = (width / 2 - 30, height / 2), 
-#    bottomleft = (width / 2 + 50, height / 2),
-#    bottomright = (width / 2 + 30, height / 2))
-
-hammerrect.topleft = ( width / 2 - 10, height / 5) 
+hammerrect.center = start_pos 
 
 
 screen.blit(hammer, hammerrect)
@@ -55,7 +48,7 @@ while 1:
             xpos -= 1
         if direction == 1:
             xpos += 1
-    hammerrect.topleft = ( xpos, width / 5)
+    hammerrect.center = ( xpos, width / 5)
 
 
     screen.fill(black)

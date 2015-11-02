@@ -15,7 +15,7 @@ class Wall:
         
         self.image = image
         
-        self.rect = self.image.get_rect(center = starting_position)
+        self.rect = self.image.get_rect(topleft = starting_position)
         
     def update_position(self):
         self.y += self.velocity        
