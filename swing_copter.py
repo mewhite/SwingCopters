@@ -14,16 +14,16 @@ import game_state
 
 
 class SwingCopters:
-    screen_size = screen_width, screen_height = 480, 600
+    screen_size = screen_width, screen_height = 671, 744
     player_start_pos = (screen_width / 2, screen_height * 4/5)
     wall_velocity = 1
     initial_player_accel = 0.3
     background = 255, 255, 255
     frame_time = 0.01
-    wall_gap_size = 200
-    wall_frequency = 300
-    wall_width = Wall.default_image.get_rect().width
-    wall_height = Wall.default_image.get_rect().height
+    wall_gap_size = 317
+    wall_frequency = 377
+    wall_width = Wall.default_width
+    wall_height = Wall.default_height
     wall_range = (int(-.9 * wall_width), int(screen_width - wall_gap_size - 1.1 * wall_width))
     wall_start_y = -200
     

@@ -9,25 +9,26 @@ from pygame import transform
 
 
 class Hammer:
-    default_image = pygame.image.load("rectangle.png")
-    default_height = 100
-    default_width = 15
-    def __init__(self, starting_position, y_velocity, image=default_image, height=default_height, width=default_width):
+    default_height = 118
+    default_width = 64
+    default_image = transform.scale(pygame.image.load("rectangle.png"), (default_width, default_height)) 
+
+    def __init__(self, starting_position, y_velocity):
         self.x = starting_position[0]
         self.y = starting_position[1]
         self.y_velocity = y_velocity
         self.x_direction = 1
 
-        self.start_rotation = 90
+        self.start_rotation = 0
         self.max_rotation = 45
         self.rotation_increment = 1
 
-        self.height = height
-        self.width = width
-        self.image = transform.scale(image, (self.height, self.width))
+        self.height = Hammer.default_height
+        self.width = Hammer.default_width
+        self.image = Hammer.default_image
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect(topleft = starting_position)
-        self.rotation = 90 #90 is vertical
+        self.rotation = 0 #90 is vertical
         
         self.collision_rect = self.rect
 

@@ -5,16 +5,20 @@ Created on Sun Nov 01 18:04:22 2015
 @author: Nolan
 """
 import pygame
+from pygame import transform
 
 class Player:
-    default_image = pygame.image.load("square.png")
-    def __init__(self, starting_position, acceleration, velocity, image=default_image):
+    default_height = 80
+    default_width = 79
+    default_image = transform.scale(pygame.image.load("square.png"), (default_width, default_height)) 
+
+    def __init__(self, starting_position, acceleration, velocity):
         self.x = starting_position[0]
         self.y = starting_position[1]
         self.acceleration = acceleration
         self.velocity = velocity
         
-        self.image = image
+        self.image = Player.default_image
         self.player_rect = self.image.get_rect(center=starting_position)
     
     def update_position(self):
