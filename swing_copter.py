@@ -9,8 +9,8 @@ import sys, pygame, time
 from player import Player
 from wall import Wall
 from hammer import Hammer
-import random
 from collections import deque
+import game_state
 
 
 class SwingCopters:
@@ -25,51 +25,18 @@ class SwingCopters:
     wall_width = Wall.default_image.get_rect().width
     wall_height = Wall.default_image.get_rect().height
     wall_range = (int(-.9 * wall_width), int(screen_width - wall_gap_size - 1.1 * wall_width))
-    #wall_range = (int(-.8 * wall_width), int(screen_width - .8 * wall_width - wall_gap_size))
-    #wall_range = (0, 0 )
+    wall_start_y = -200
     
     def __init__(self):
-        self.num_walls = 0
-        self.num_hammers = 0
-
         pygame.init()
         self.frame_count = 0
-
+        self.playing = False
         self.screen = pygame.display.set_mode(SwingCopters.screen_size)
 
-        self.player = Player(SwingCopters.player_start_pos, 0, 0)
-        self.walls = deque()
-        self.hammers = deque()
-        
-    def create_walls(self):
-        wall_x = random.randint(SwingCopters.wall_range[0], SwingCopters.wall_range[1])
-
-        wall_position1 = (wall_x, 0)
-        wall_position2 = (wall_x + SwingCopters.wall_width + SwingCopters.wall_gap_size, 0)
-        
-        hammer_x = random.randint(SwingCopters.wall_range[0], SwingCopters.wall_range[1])
-        hammer_position1 = (wall_x + .9 * SwingCopters.wall_width, SwingCopters.wall_height)
-
-        hammer_position2 = (wall_x + SwingCopters.wall_width + SwingCopters.wall_gap_size + .1 * SwingCopters.wall_width, 
-            SwingCopters.wall_height)
-
-
-        
-
-        first_wall = Wall(wall_position1, SwingCopters.wall_velocity)
-        self.walls.append(first_wall)
-        second_wall = Wall(wall_position2, SwingCopters.wall_velocity)
-        self.walls.append(second_wall)
-        
-        self.num_walls += 2
-
-
-        first_hammer = Hammer(hammer_position1, SwingCopters.wall_velocity)
-        self.hammers.append(first_hammer)
-        second_hammer = Hammer(hammer_position2, SwingCopters.wall_velocity)
-        self.hammers.append(second_hammer)
-        
-        self.num_hammers += 2
+        player = Player(SwingCopters.player_start_pos, 0, 0)
+        walls = deque()
+        hammers = deque()
+        self.game_state = game_state.GameState(player, walls, hammers, 0, False)
     
     def update_display(self):
         self.screen.fill(SwingCopters.background)
@@ -94,47 +61,44 @@ class SwingCopters:
             self.num_hammers -= 2
             
         pygame.display.flip()
-
-    def detect_collision(self):
-        p_rect = self.player.player_rect
-        if p_rect.left < 0 or p_rect.right > SwingCopters.screen_width:
-            return True
         
-        for wall in self.walls:
-            if p_rect.colliderect(wall.rect):
-                return True
-                
-        for hammer in self.hammers:
-            if p_rect.colliderect(hammer.collision_rect):
-                return True
-                
-        return False
-
-        
-    def handle_input(self):
+    def detect_input(self):
+        is_input = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if self.player.acceleration == 0:
-                        self.player.set_acceleration(SwingCopters.initial_player_accel)
-                    else:
-                        self.player.change_acceleration()
+                    is_input = True
+        return is_input
                         
     def restart(self):
-        self.player = Player(SwingCopters.player_start_pos, 0, 0)
-        self.walls = deque()
-        self.hammers = deque()
-        self.num_walls = 0
+        player = Player(SwingCopters.player_start_pos, 0, 0)
+        walls = deque()
+        hammers = deque()
+        self.game_state = game_state.GameState(player, walls, hammers, 0, False)
+        self.playing = False
     
+    def draw_state(self):
+        self.screen.fill(SwingCopters.background)
+        self.game_state.player.draw_player(self.screen)
+        
+        for wall in self.game_state.walls:
+            wall.draw_wall(self.screen)
+    
+        for hammer in self.game_state.hammers:
+            hammer.draw_hammer(self.screen)
+            
+        pygame.display.flip()
+        
     def run_game(self):
         while 1:
-            self.handle_input()
-            if self.detect_collision():
-                self.restart()
-            self.update_display()
-            self.frame_count += 1
-            if self.frame_count % SwingCopters.wall_frequency == 0:
-                self.create_walls()
+            is_input = self.detect_input()
+            if is_input:
+                self.playing = True
+            if self.playing:
+                self.game_state.update_state(is_input)
+                if self.game_state.game_over:
+                    self.restart()
+            self.draw_state()
             time.sleep(SwingCopters.frame_time)
             
