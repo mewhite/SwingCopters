@@ -11,6 +11,7 @@ from wall import Wall
 from hammer import Hammer
 from collections import deque
 import game_state
+from copy import copy
 
 
 class SwingCopters:
@@ -19,7 +20,8 @@ class SwingCopters:
     wall_velocity = 1
     initial_player_accel = 0.3
     background = 255, 255, 255
-    frame_time = 0.01
+    score_color = 0, 0, 0
+    frame_time = 0.007
     wall_gap_size = 317
     wall_frequency = 377
     wall_width = Wall.default_width
@@ -29,6 +31,7 @@ class SwingCopters:
     
     def __init__(self):
         pygame.init()
+        self.font = pygame.font.Font(None, 60)
         self.frame_count = 0
         self.playing = False
         self.screen = pygame.display.set_mode(SwingCopters.screen_size)
@@ -87,7 +90,9 @@ class SwingCopters:
     
         for hammer in self.game_state.hammers:
             hammer.draw_hammer(self.screen)
-            
+        
+        #score_display = self.font.render(str(self.game_state.score), 0, SwingCopters.score_color, SwingCopters.background)
+        #self.screen.blit(score_display, (10, 10))
         pygame.display.flip()
         
     def run_game(self):

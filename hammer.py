@@ -44,7 +44,7 @@ class Hammer:
                 self.x -= 1.5
             if self.x_direction == 1:
                 self.x += 1.5
-    	self.rect.topleft = ( self.x, self.y)
+        self.rect.topleft = ( self.x, self.y)
     
     def draw_hammer(self, surface):
         display_hammer = transform.rotate(self.image, self.rotation)

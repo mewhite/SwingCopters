@@ -10,11 +10,12 @@ from hammer import Hammer
 import random
 
 class GameState:
-    def __init__(self, player, walls, hammers, frame_count, game_over):
+    def __init__(self, player, walls, hammers, frame_count, game_over=False, score=0):
         self.frame_count = frame_count
         self.player = player
         self.walls = walls
         self.hammers = hammers
+        self.score = score
         self.game_over = game_over
 
     def detect_collision(self):
@@ -54,7 +55,6 @@ class GameState:
         second_hammer = Hammer(hammer_position2, swing_copter.SwingCopters.wall_velocity)
         self.hammers.append(second_hammer)
 
-        
     def update_positions(self):        
         self.player.update_position()
         
@@ -71,7 +71,11 @@ class GameState:
             self.hammers.popleft()
             self.hammers.popleft()
             
-    def update_state(self, player_input):
+            self.score += 1
+            
+        #if (self.walls and self.walls[0].y > self.player.y):
+
+    def update_state(self, player_input, create_walls=True):
         # Handle input
         if player_input:
             if self.player.acceleration == 0:
@@ -83,9 +87,9 @@ class GameState:
 
         if self.detect_collision():
             self.game_over = True
-
-        if self.frame_count % swing_copter.SwingCopters.wall_frequency == 0:
-            self.create_walls()
+        if create_walls:
+            if self.frame_count % swing_copter.SwingCopters.wall_frequency == 0:
+                self.create_walls()
 
         self.frame_count += 1
         
