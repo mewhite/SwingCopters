@@ -11,38 +11,26 @@ from wall import Wall
 from hammer import Hammer
 from collections import deque
 import game_state
-from copy import copy
-
+from copy import deepcopy
+from swing_copter_constants import SC
+from game_player import GamePlayer
 
 class SwingCopters:
-    screen_size = screen_width, screen_height = 671, 744
-    player_start_pos = (screen_width / 2, screen_height * 4/5)
-    wall_velocity = 1
-    initial_player_accel = 0.3
-    background = 255, 255, 255
-    score_color = 0, 0, 0
-    frame_time = 0.007
-    wall_gap_size = 317
-    wall_frequency = 377
-    wall_width = Wall.default_width
-    wall_height = Wall.default_height
-    wall_range = (int(-.9 * wall_width), int(screen_width - wall_gap_size - 1.1 * wall_width))
-    wall_start_y = -200
-    
+
     def __init__(self):
         pygame.init()
         self.font = pygame.font.Font(None, 60)
         self.frame_count = 0
         self.playing = False
-        self.screen = pygame.display.set_mode(SwingCopters.screen_size)
+        self.screen = pygame.display.set_mode(SC.screen_size)
 
-        player = Player(SwingCopters.player_start_pos, 0, 0)
+        player = Player(SC.player_start_pos, 0, 0)
         walls = deque()
         hammers = deque()
         self.game_state = game_state.GameState(player, walls, hammers, 0, False)
     
     def update_display(self):
-        self.screen.fill(SwingCopters.background)
+        self.screen.fill(SC.background)
         self.player.update_position()
         self.player.draw_player(self.screen)
         
@@ -54,7 +42,7 @@ class SwingCopters:
             hammer.update_position()
             hammer.draw_hammer(self.screen)
 
-        if (self.num_walls > 0 and self.walls[0].y > SwingCopters.screen_height):
+        if (self.num_walls > 0 and self.walls[0].y > SC.screen_height):
             self.walls.popleft()
             self.walls.popleft()
             self.num_walls -= 2
@@ -75,14 +63,15 @@ class SwingCopters:
         return is_input
                         
     def restart(self):
-        player = Player(SwingCopters.player_start_pos, 0, 0)
+        self.frame_count = 0
+        player = Player(SC.player_start_pos, 0, 0)
         walls = deque()
         hammers = deque()
         self.game_state = game_state.GameState(player, walls, hammers, 0, False)
         self.playing = False
     
     def draw_state(self):
-        self.screen.fill(SwingCopters.background)
+        self.screen.fill(SC.background)
         self.game_state.player.draw_player(self.screen)
         
         for wall in self.game_state.walls:
@@ -91,7 +80,7 @@ class SwingCopters:
         for hammer in self.game_state.hammers:
             hammer.draw_hammer(self.screen)
         
-        #score_display = self.font.render(str(self.game_state.score), 0, SwingCopters.score_color, SwingCopters.background)
+        #score_display = self.font.render(str(self.game_state.score), 0, SC.score_color, SC.background)
         #self.screen.blit(score_display, (10, 10))
         pygame.display.flip()
         
@@ -105,5 +94,29 @@ class SwingCopters:
                 if self.game_state.game_over:
                     self.restart()
             self.draw_state()
-            time.sleep(SwingCopters.frame_time)
-            
+            time.sleep(SC.frame_time)
+    
+    def run_game_player(self):
+        self.game_state.update_state(True)
+        game_player = GamePlayer()
+        while 1:
+            self.frame_count += 1
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: sys.exit()
+            if self.game_state.frame_count % 10 == 0:
+                action = game_player.get_action(self.game_state)  
+                #print action
+            else:
+                action = False
+            prev_game_state = deepcopy(self.game_state)
+            self.game_state.update_state(action)
+            reward = 0
+            if self.game_state.game_over:
+                print "game over"
+                reward = self.frame_count
+                game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
+                self.restart()
+            else:
+                game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
+            self.draw_state()
+            time.sleep(SC.frame_time)

@@ -8,4 +8,5 @@ Created on Sun Nov 01 18:02:00 2015
 from swing_copter import SwingCopters
 
 game = SwingCopters()
-game.run_game()
+#game.run_game()
+game.run_game_player()
