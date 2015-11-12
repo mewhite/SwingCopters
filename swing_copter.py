@@ -97,23 +97,28 @@ class SwingCopters:
             time.sleep(SC.frame_time)
     
     def run_game_player(self):
+        full_mobility = False
+
         self.game_state.update_state(True)
         game_player = GamePlayer()
         while 1:
             self.frame_count += 1
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
-            if self.game_state.frame_count % 10 == 0:
-                action = game_player.get_action(self.game_state)  
-                #print action
+            if not full_mobility:
+                if self.game_state.frame_count % 10 == 0:
+                    action = game_player.get_action(self.game_state)  
+                    print "chosen action: " + str(action)
+                else:
+                    action = False
             else:
-                action = False
+                action = game_player.get_action(self.game_state)  
             prev_game_state = deepcopy(self.game_state)
             self.game_state.update_state(action)
-            reward = 0
+            reward = 1
             if self.game_state.game_over:
                 print "game over"
-                reward = self.frame_count
+                reward = 0
                 game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
                 self.restart()
             else:
