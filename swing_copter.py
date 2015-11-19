@@ -115,10 +115,10 @@ class SwingCopters:
                 action = game_player.get_action(self.game_state)  
             prev_game_state = deepcopy(self.game_state)
             self.game_state.update_state(action)
-            reward = 1
+            reward = 0
             if self.game_state.game_over:
                 print "game over"
-                reward = 0
+                reward = self.frame_count
                 game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
                 self.restart()
             else:

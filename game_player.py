@@ -6,7 +6,7 @@ from copy import deepcopy
 
 class GamePlayer:
 	actions = [True, False]
-	def __init__(self, exploration_prob=0.0, step_size=.01, discount=.5):
+	def __init__(self, exploration_prob=0.1, step_size=.01, discount=.9):
 		self.exploration_prob = exploration_prob
 		self.weights = Counter()
 		self.step_size = step_size
@@ -16,13 +16,39 @@ class GamePlayer:
 		features = {}
 
 		player = game_state.player
-
+		walls = game_state.walls
+		distance_to_wall = 0
+		if walls:
+			if player.acceleration > 0:
+				right_wall = walls[1]
+				distance_to_wall = right_wall.x - player.x
+			else:
+				left_wall = walls[0]
+				distance_to_wall = player.x - left_wall.x + 354 # TODO: Change to reasonable (not 354)
+		dtw = 0
+		if distance_to_wall > 100:
+			dtw = 1
+		dtw2 = 0
+		if dtw2 > 50:
+			dtw2 = 1
+		features["dtw"] = dtw
+		features["dtw2"] = dtw2
+		features["dtwn"] = -1 * dtw
 		if player.acceleration > 0:
 			distance_to_edge = SC.screen_width - player.x - player.width
 		else:
 			distance_to_edge = player.x
+		dte200 = 0
+		if distance_to_edge > 200:
+			dte200 = 1
+		dte100 = 0
+		if distance_to_edge > 100:
+			dte100 = 1
+		features["distance_to_edge3"] = dte100
+		features["distance_to_edge"] = dte200
+		features["distance_to_edge2"] = -1 * dte200
 
-		features["distance_to_edge"] = distance_to_edge
+
 		#self.weights["distance_to_edge"] = 1
 		return features
 
@@ -64,4 +90,4 @@ class GamePlayer:
 			print "feture value: " + str(value)
 			self.weights[feature] -= self.step_size * residual * value
 			print "weights after: " + str(self.weights)
-		self.normalize_weights()
+		#self.normalize_weights()

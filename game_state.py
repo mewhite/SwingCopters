@@ -9,6 +9,7 @@ from wall import Wall
 from hammer import Hammer
 import random
 from swing_copter_constants import SC
+from copy import deepcopy
 
 
 class GameState:
@@ -76,7 +77,7 @@ class GameState:
             self.score += 1
             
         #if (self.walls and self.walls[0].y > self.player.y):
-
+        
     def update_state(self, player_input, create_walls=True):
         # Handle input
         if player_input:
@@ -94,6 +95,10 @@ class GameState:
                 self.create_walls()
 
         self.frame_count += 1
-        
+
+    def get_next_state(self, player_action, create_walls=True):
+       next_state = deepcopy(self)
+       next_state.update(player_action, create_walls)
+       return next_state        
         
         
