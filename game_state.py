@@ -98,7 +98,7 @@ class GameState:
 
     def get_next_state(self, player_action, create_walls=True):
        next_state = deepcopy(self)
-       next_state.update(player_action, create_walls)
+       next_state.update_state(player_action, create_walls)
        return next_state        
         
         

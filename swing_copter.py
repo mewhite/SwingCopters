@@ -14,6 +14,7 @@ import game_state
 from copy import deepcopy
 from swing_copter_constants import SC
 from game_player import GamePlayer
+import mcts
 
 class SwingCopters:
 
@@ -97,7 +98,7 @@ class SwingCopters:
             time.sleep(SC.frame_time)
     
     def run_game_player(self):
-        full_mobility = False
+        full_mobility = True
 
         self.game_state.update_state(True)
         game_player = GamePlayer()
@@ -107,12 +108,13 @@ class SwingCopters:
                 if event.type == pygame.QUIT: sys.exit()
             if not full_mobility:
                 if self.game_state.frame_count % 10 == 0:
-                    action = game_player.get_action(self.game_state)  
-                    print "chosen action: " + str(action)
+                    action = mcts.get_MCTS_action(self.game_state)
+                    #action = game_player.get_action(self.game_state)  
                 else:
                     action = False
             else:
-                action = game_player.get_action(self.game_state)  
+                #action = game_player.get_action(self.game_state) 
+                action = mcts.get_MCTS_action(self.game_state)
             prev_game_state = deepcopy(self.game_state)
             self.game_state.update_state(action)
             reward = 0
@@ -124,4 +126,4 @@ class SwingCopters:
             else:
                 game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
             self.draw_state()
-            time.sleep(SC.frame_time)
+            #time.sleep(SC.frame_time)

@@ -6,8 +6,9 @@ Created on Thu Nov 19 13:27:58 2015
 """
 
 class StateTreeNode:
-	def __init__(self, game_state, children=[None,None], parent=None, visits=0):
-		self.children = children
+	def __init__(self, game_state, utility=0, parent=None, visits=0):
+		self.utility = utility
+		self.children = [None, None]
 		self.parent = parent
 		self.visits = visits
 		self.game_state = game_state
