@@ -109,11 +109,11 @@ class SwingCopters:
             if not full_mobility:
                 if self.game_state.frame_count % 10 == 0:
                     action = mcts.get_MCTS_action(self.game_state)
-                    #action = game_player.get_action(self.game_state)  
+                    action = game_player.get_action(self.game_state)  
                 else:
                     action = False
             else:
-                #action = game_player.get_action(self.game_state) 
+                action = game_player.get_action(self.game_state) 
                 action = mcts.get_MCTS_action(self.game_state)
             prev_game_state = deepcopy(self.game_state)
             self.game_state.update_state(action)
@@ -126,4 +126,28 @@ class SwingCopters:
             else:
                 game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
             self.draw_state()
-            #time.sleep(SC.frame_time)
+            time.sleep(SC.frame_time)
+
+    def run_mcts_player(self):
+        full_mobility = True
+
+        self.game_state.update_state(True)
+        while 1:
+            self.frame_count += 1
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: sys.exit()
+            if not full_mobility:
+                if self.game_state.frame_count % 10 == 0:
+                    action = mcts.get_MCTS_action(self.game_state)
+                else:
+                    action = False
+            else:
+                action = mcts.get_MCTS_action(self.game_state)
+            print "Action: " + str(action)
+            prev_game_state = deepcopy(self.game_state)
+            self.game_state.update_state(action)
+            reward = 0
+            if self.game_state.game_over:
+                print "game over"
+                self.restart()
+            self.draw_state()

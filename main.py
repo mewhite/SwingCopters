@@ -9,4 +9,4 @@ from swing_copter import SwingCopters
 
 game = SwingCopters()
 #game.run_game()
-game.run_game_player()
+game.run_mcts_player()

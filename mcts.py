@@ -2,9 +2,10 @@ import swing_copter
 import math
 import random
 from state_tree_node import StateTreeNode
+import copy
 
 actions = [True, False]
-num_iters = 100
+num_iters = 5
 
 def select(node):
 	if node.visits == 0:
@@ -32,10 +33,10 @@ def get_reward(game_state):
 	return game_state.frame_count
 
 def simulate(node):
-	state = node.game_state
+	state = copy.deepcopy(node.game_state)
 	while not state.game_over:
 		action = random.random() > 0.5
-		state = state.get_next_state(action, create_walls=False)
+		state.update_state(action, create_walls=False)
 	return get_reward(state)
 
 def backpropagate(node, score):
