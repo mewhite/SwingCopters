@@ -13,7 +13,7 @@ from collections import deque
 import game_state
 from copy import deepcopy
 from swing_copter_constants import SC
-from game_player import GamePlayer
+from game_player import QLearningPlayer
 import mcts
 
 class SwingCopters:
@@ -85,7 +85,7 @@ class SwingCopters:
         #self.screen.blit(score_display, (10, 10))
         pygame.display.flip()
         
-    def run_game(self):
+    def run_human_player(self):
         while 1:
             is_input = self.detect_input()
             if is_input:
@@ -97,11 +97,11 @@ class SwingCopters:
             self.draw_state()
             time.sleep(SC.frame_time)
     
-    def run_game_player(self):
+    def run_qlearning_player(self):
         full_mobility = True
 
         self.game_state.update_state(True)
-        game_player = GamePlayer()
+        game_player = QLearningPlayer()
         while 1:
             self.frame_count += 1
             for event in pygame.event.get():
