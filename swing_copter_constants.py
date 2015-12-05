@@ -16,5 +16,5 @@ class SC:
     wall_start_y = -200
     frozen_frames_after_input = 10
     # MCTS Settings
-    num_charges = 30
-    max_charge_depth = 10000
+    mcts_num_charges = 5
+    mcts_max_charge_depth = 10000

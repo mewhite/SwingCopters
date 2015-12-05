@@ -3,6 +3,8 @@ import math
 import random
 from state_tree_node import StateTreeNode
 import copy
+from swing_copter_constants import SC
+
 
 def select(node):
 	if node.visits == 0:
@@ -35,7 +37,7 @@ def get_reward(game_state):
 def simulate(node):
 	state = copy.deepcopy(node.game_state)
 	depth = 0
-	while not state.game_over and depth < max_charge_depth:
+	while not state.game_over and depth < SC.mcts_max_charge_depth:
 		action = random.random() > 0.5
 		state.update_state(action, create_walls=False)
 		depth += 1
@@ -53,7 +55,7 @@ def get_MCTS_action(game_state):
 		return actions[0]
 
 	root = StateTreeNode(game_state)
-	for i in xrange(num_charges):
+	for i in xrange(SC.mcts_num_charges):
 		node = select(root)
 		expand(root, node)
 		score = simulate(node)
