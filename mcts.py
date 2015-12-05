@@ -4,9 +4,6 @@ import random
 from state_tree_node import StateTreeNode
 import copy
 
-num_charges = 20
-max_charge_depth = 10000
-
 def select(node):
 	if node.visits == 0:
 		return node

@@ -15,3 +15,6 @@ class SC:
     wall_range = (int(-.9 * wall_width), int(screen_width - wall_gap_size - 1.1 * wall_width))
     wall_start_y = -200
     frozen_frames_after_input = 10
+    # MCTS Settings
+    num_charges = 30
+    max_charge_depth = 10000
