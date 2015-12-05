@@ -4,7 +4,8 @@ from swing_copter_constants import SC
 from collections import Counter
 from copy import deepcopy
 
-class GamePlayer:
+#Q learning game player
+class QLearningPlayer:
 	actions = [True, False]
 	def __init__(self, exploration_prob=0.1, step_size=.01, discount=.9):
 		self.exploration_prob = exploration_prob
@@ -63,7 +64,7 @@ class GamePlayer:
 		return score
 
 	def get_action(self, game_state):
-		actions = GamePlayer.actions
+		actions = QLearningPlayer.actions
 		if random.random() < self.exploration_prob:
 			return random.choice(actions)
 		else:
@@ -76,7 +77,7 @@ class GamePlayer:
 				self.weights[feature] /= max_feature_weight
 
 	def incorporate_feedback(self, game_state, action, reward, next_game_state):
-		actions = GamePlayer.actions
+		actions = QLearningPlayer.actions
 		prediction =  self.estimate_state_score(game_state, action)
 		target = reward + (self.discount * max(self.estimate_state_score(next_game_state, next_action) for next_action in actions))
 		residual = prediction - target
