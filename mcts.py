@@ -4,7 +4,8 @@ import random
 from state_tree_node import StateTreeNode
 import copy
 
-num_charges = 10
+num_charges = 20
+max_charge_depth = 10000
 
 def select(node):
 	if node.visits == 0:
@@ -36,9 +37,11 @@ def get_reward(game_state):
 
 def simulate(node):
 	state = copy.deepcopy(node.game_state)
-	while not state.game_over:
+	depth = 0
+	while not state.game_over and depth < max_charge_depth:
 		action = random.random() > 0.5
 		state.update_state(action, create_walls=False)
+		depth += 1
 	return get_reward(state)
 
 def backpropagate(node, score):
