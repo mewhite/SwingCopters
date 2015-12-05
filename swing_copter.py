@@ -29,30 +29,6 @@ class SwingCopters:
         walls = deque()
         hammers = deque()
         self.game_state = game_state.GameState(player, walls, hammers, 0, False)
-    
-    def update_display(self):
-        self.screen.fill(SC.background)
-        self.player.update_position()
-        self.player.draw_player(self.screen)
-        
-        for wall in self.walls:
-            wall.update_position()
-            wall.draw_wall(self.screen)
-    
-        for hammer in self.hammers:
-            hammer.update_position()
-            hammer.draw_hammer(self.screen)
-
-        if (self.num_walls > 0 and self.walls[0].y > SC.screen_height):
-            self.walls.popleft()
-            self.walls.popleft()
-            self.num_walls -= 2
-
-            self.hammers.popleft()
-            self.hammers.popleft()
-            self.num_hammers -= 2
-            
-        pygame.display.flip()
         
     def detect_input(self):
         is_input = False
