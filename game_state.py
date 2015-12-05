@@ -105,7 +105,7 @@ class GameState:
        return next_state        
     
     def get_actions(self):
-        if frozen_frames > 0:
+        if self.frozen_frames > 0:
             return [False]
         else:
             return [True, False]

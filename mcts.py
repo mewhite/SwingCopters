@@ -4,14 +4,15 @@ import random
 from state_tree_node import StateTreeNode
 import copy
 
-actions = [True, False]
-num_iters = 5
+num_charges = 10
 
 def select(node):
 	if node.visits == 0:
 		return node
 	score = 0
 	for i in range(len(node.children)):
+		if node.children[i] == None:
+			continue
 		if node.children[i].visits == 0:
 			return node.children[i]
 		new_score = selectfn(node.children[i])
@@ -24,6 +25,7 @@ def selectfn(node):
 	return node.utility + math.sqrt( 2 * math.log(node.parent.visits) / node.visits )
 
 def expand(root, node):
+	actions = node.game_state.get_actions()
 	for i in range(len(actions)):
 		new_state = node.game_state.get_next_state(actions[i], create_walls=False)
 		new_node = StateTreeNode(new_state, parent = node)
@@ -46,8 +48,12 @@ def backpropagate(node, score):
 		backpropagate(node.parent, score)
 
 def get_MCTS_action(game_state):
+	actions = game_state.get_actions()
+	if len(actions) == 1:
+		return actions[0]
+
 	root = StateTreeNode(game_state)
-	for i in xrange(num_iters):
+	for i in xrange(num_charges):
 		node = select(root)
 		expand(root, node)
 		score = simulate(node)
