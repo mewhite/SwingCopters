@@ -20,6 +20,7 @@ class GameState:
         self.hammers = hammers
         self.score = score
         self.game_over = game_over
+        self.frozen_frames = 0
 
     def detect_collision(self):
         p_rect = self.player.player_rect
@@ -80,11 +81,12 @@ class GameState:
         
     def update_state(self, player_input, create_walls=True):
         # Handle input
-        if player_input:
+        if self.frozen_frames == 0 and player_input:
             if self.player.acceleration == 0:
                 self.player.set_acceleration(SC.initial_player_accel)
             else:
                 self.player.change_acceleration()
+            self.frozen_frames += SC.frozen_frames_after_input + 1
 
         self.update_positions()
 
@@ -93,12 +95,18 @@ class GameState:
         if create_walls:
             if self.frame_count % SC.wall_frequency == 0:
                 self.create_walls()
-
+        if self.frozen_frames > 0:
+            self.frozen_frames -= 1
         self.frame_count += 1
 
     def get_next_state(self, player_action, create_walls=True):
        next_state = deepcopy(self)
        next_state.update_state(player_action, create_walls)
        return next_state        
-        
+    
+    def get_actions(self):
+        if frozen_frames > 0:
+            return [False]
+        else:
+            return [True, False]
         
