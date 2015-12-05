@@ -7,6 +7,10 @@ Created on Sun Nov 01 18:02:00 2015
 
 from swing_copter import SwingCopters
 
-game = SwingCopters()
+display_game = False
+game = SwingCopters(display_game)
 #game.run_human_player()
-game.run_mcts_player()
+num_games = 20
+scores = game.run_mcts_player(num_games)
+print "Scores: " + str(scores)
+print "Average Score: " + str(sum(scores) / ( len(scores) + 0.0 ))

@@ -18,41 +18,18 @@ import mcts
 
 class SwingCopters:
 
-    def __init__(self):
+    def __init__(self, display_game=True):
         pygame.init()
         self.font = pygame.font.Font(None, 60)
-        self.frame_count = 0
         self.playing = False
-        self.screen = pygame.display.set_mode(SC.screen_size)
+        self.display_game = display_game
+        if self.display_game:
+            self.screen = pygame.display.set_mode(SC.screen_size)
 
         player = Player(SC.player_start_pos, 0, 0)
         walls = deque()
         hammers = deque()
         self.game_state = game_state.GameState(player, walls, hammers, 0, False)
-    
-    def update_display(self):
-        self.screen.fill(SC.background)
-        self.player.update_position()
-        self.player.draw_player(self.screen)
-        
-        for wall in self.walls:
-            wall.update_position()
-            wall.draw_wall(self.screen)
-    
-        for hammer in self.hammers:
-            hammer.update_position()
-            hammer.draw_hammer(self.screen)
-
-        if (self.num_walls > 0 and self.walls[0].y > SC.screen_height):
-            self.walls.popleft()
-            self.walls.popleft()
-            self.num_walls -= 2
-
-            self.hammers.popleft()
-            self.hammers.popleft()
-            self.num_hammers -= 2
-            
-        pygame.display.flip()
         
     def detect_input(self):
         is_input = False
@@ -64,7 +41,6 @@ class SwingCopters:
         return is_input
                         
     def restart(self):
-        self.frame_count = 0
         player = Player(SC.player_start_pos, 0, 0)
         walls = deque()
         hammers = deque()
@@ -103,7 +79,6 @@ class SwingCopters:
         self.game_state.update_state(True)
         game_player = QLearningPlayer()
         while 1:
-            self.frame_count += 1
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
             if not full_mobility:
@@ -120,7 +95,7 @@ class SwingCopters:
             reward = 0
             if self.game_state.game_over:
                 print "game over"
-                reward = self.frame_count
+                reward = self.game_state.frame_count
                 game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
                 self.restart()
             else:
@@ -128,14 +103,14 @@ class SwingCopters:
             self.draw_state()
             time.sleep(SC.frame_time)
 
-    def run_mcts_player(self):
+    def run_mcts_player(self, num_games=10):
         full_mobility = True
-
+        scores = []
         self.game_state.update_state(True)
+        game_number = 0
         while 1:
-            self.frame_count += 1
             for event in pygame.event.get():
-                if event.type == pygame.QUIT: sys.exit()
+                if event.type == pygame.QUIT: return scores
             if not full_mobility:
                 if self.game_state.frame_count % 10 == 0:
                     action = mcts.get_MCTS_action(self.game_state)
@@ -143,11 +118,14 @@ class SwingCopters:
                     action = False
             else:
                 action = mcts.get_MCTS_action(self.game_state)
-            print "Action: " + str(action)
+            #print "Action: " + str(action)
             prev_game_state = deepcopy(self.game_state)
             self.game_state.update_state(action)
-            reward = 0
             if self.game_state.game_over:
-                print "game over"
+                scores.append(self.game_state.frame_count)
+                print self.game_state.frame_count
+                game_number += 1
+                if game_number == num_games: return scores
                 self.restart()
-            self.draw_state()
+            if self.display_game:
+                self.draw_state()
