@@ -27,7 +27,7 @@ def selectfn(node):
 def expand(root, node):
 	actions = node.game_state.get_actions()
 	for i in range(len(actions)):
-		new_state = node.game_state.get_next_state(actions[i], create_walls=False)
+		new_state = node.game_state.get_next_state(actions[i], create_platforms=False)
 		new_node = StateTreeNode(new_state, parent = node)
 		node.children[i] = new_node
 
@@ -39,7 +39,7 @@ def simulate(node):
 	depth = 0
 	while not state.game_over and depth < SC.mcts_max_charge_depth:
 		action = random.random() > 0.5
-		state.update_state(action, create_walls=False)
+		state.update_state(action, create_platforms=False)
 		depth += 1
 	return get_reward(state)
 

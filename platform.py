@@ -8,7 +8,7 @@ import pygame
 from pygame import transform
 
 
-class Wall:
+class Platform:
     default_height = 38
     default_width = 354
     default_image = transform.scale(pygame.image.load("platform.png"), (default_width, default_height))
@@ -18,7 +18,7 @@ class Wall:
         self.y = starting_position[1]
         self.velocity = velocity
         
-        self.image = Wall.default_image
+        self.image = Platform.default_image
         
         self.rect = self.image.get_rect(topleft = starting_position)
         
@@ -27,5 +27,5 @@ class Wall:
         speed = [0, self.velocity]
         self.rect = self.rect.move(speed)
     
-    def draw_wall(self, surface):
+    def draw_platform(self, surface):
         surface.blit(self.image, self.rect)

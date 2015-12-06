@@ -5,7 +5,7 @@ Created on Sat Nov 07 15:12:29 2015
 @author: Nolan
 """
 import swing_copter
-from wall import Wall
+from platform import Platform
 from hammer import Hammer
 import random
 from swing_copter_constants import SC
@@ -13,10 +13,10 @@ from copy import deepcopy
 
 
 class GameState:
-    def __init__(self, player, walls, hammers, frame_count, game_over=False, score=0):
+    def __init__(self, player, platforms, hammers, frame_count, game_over=False, score=0):
         self.frame_count = frame_count
         self.player = player
-        self.walls = walls
+        self.platforms = platforms
         self.hammers = hammers
         self.score = score
         self.game_over = game_over
@@ -27,8 +27,8 @@ class GameState:
         if p_rect.left < 0 or p_rect.right > SC.screen_width:
             return True
         
-        for wall in self.walls:
-            if p_rect.colliderect(wall.rect):
+        for platform in self.platforms:
+            if p_rect.colliderect(platform.rect):
                 return True
                 
         for hammer in self.hammers:
@@ -37,49 +37,49 @@ class GameState:
                 
         return False
     
-    def create_walls(self):
-        wall_x = random.randint(SC.wall_range[0], SC.wall_range[1])
+    def create_platforms(self):
+        platform_x = random.randint(SC.platform_range[0], SC.platform_range[1])
 
-        wall_position1 = (wall_x, SC.wall_start_y)
-        wall_position2 = (wall_x + SC.wall_width + SC.wall_gap_size, SC.wall_start_y)
+        platform_position1 = (platform_x, SC.platform_start_y)
+        platform_position2 = (platform_x + SC.platform_width + SC.platform_gap_size, SC.platform_start_y)
         
-        hammer_x = random.randint(SC.wall_range[0], SC.wall_range[1])
-        hammer_position1 = (wall_x + .9 * SC.wall_width - Hammer.default_width, SC.wall_start_y + SC.wall_height)
+        hammer_x = random.randint(SC.platform_range[0], SC.platform_range[1])
+        hammer_position1 = (platform_x + .9 * SC.platform_width - Hammer.default_width, SC.platform_start_y + SC.platform_height)
 
-        hammer_position2 = (wall_x + SC.wall_width + SC.wall_gap_size + .1 * SC.wall_width, 
-            SC.wall_start_y + SC.wall_height)
+        hammer_position2 = (platform_x + SC.platform_width + SC.platform_gap_size + .1 * SC.platform_width, 
+            SC.platform_start_y + SC.platform_height)
 
-        first_wall = Wall(wall_position1, SC.wall_velocity)
-        self.walls.append(first_wall)
-        second_wall = Wall(wall_position2, SC.wall_velocity)
-        self.walls.append(second_wall)
-
-        first_hammer = Hammer(hammer_position1, SC.wall_velocity)
+        first_platform = Platform(platform_position1, SC.platform_velocity)
+        self.platforms.append(first_platform)
+        second_platform = Platform(platform_position2, SC.platform_velocity)
+        self.platforms.append(second_platform)
+        """
+        first_hammer = Hammer(hammer_position1, SC.platform_velocity)
         self.hammers.append(first_hammer)
-        second_hammer = Hammer(hammer_position2, SC.wall_velocity)
-        self.hammers.append(second_hammer)
+        second_hammer = Hammer(hammer_position2, SC.platform_velocity)
+        self.hammers.append(second_hammer)"""
 
     def update_positions(self):        
         self.player.update_position()
         
-        for wall in self.walls:
-            wall.update_position()
+        for platform in self.platforms:
+            platform.update_position()
     
         for hammer in self.hammers:
             hammer.update_position()
 
-        if (self.walls and self.walls[0].y > SC.screen_height):
-            self.walls.popleft()
-            self.walls.popleft()
-
-            self.hammers.popleft()
-            self.hammers.popleft()
+        if (self.platforms and self.platforms[0].y > self.player.y + SC.platform_height):
+            self.platforms.popleft()
+            self.platforms.popleft()
+            if self.hammers:
+                self.hammers.popleft()
+                self.hammers.popleft()
             
             self.score += 1
             
-        #if (self.walls and self.walls[0].y > self.player.y):
+        #if (self.platforms and self.platforms[0].y > self.player.y):
         
-    def update_state(self, player_input, create_walls=True):
+    def update_state(self, player_input, create_platforms=True):
         # Handle input
         if self.frozen_frames == 0 and player_input:
             if self.player.acceleration == 0:
@@ -92,16 +92,16 @@ class GameState:
 
         if self.detect_collision():
             self.game_over = True
-        if create_walls:
-            if self.frame_count % SC.wall_frequency == 0:
-                self.create_walls()
+        if create_platforms:
+            if self.frame_count % SC.platform_frequency == 0:
+                self.create_platforms()
         if self.frozen_frames > 0:
             self.frozen_frames -= 1
         self.frame_count += 1
 
-    def get_next_state(self, player_action, create_walls=True):
+    def get_next_state(self, player_action, create_platforms=True):
        next_state = deepcopy(self)
-       next_state.update_state(player_action, create_walls)
+       next_state.update_state(player_action, create_platforms)
        return next_state        
     
     def get_actions(self):
