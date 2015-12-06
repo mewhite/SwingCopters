@@ -55,8 +55,10 @@ class QLearningPlayer:
 
 
 			distance_to_gap_times_acc = distance_to_gap * player.acceleration
-			self.add_discrete_features(distance_to_gap_times_acc, "distance_to_gap_times_acc", -500, 500, 10)
+			self.add_discrete_features(distance_to_gap_times_acc, "distance_to_gap_times_acc", -500, 500, 20)
 
+			distance_to_gap_times_acc_times_vel = distance_to_gap * player.acceleration * player.velocity
+			self.add_discrete_features(distance_to_gap_times_acc_times_vel, "distance_to_gap_times_acc_times_vel", -1500, 1500, 100)
 			#self.add_discrete_features(features, distance_to_left_platform, "distance_to_left_platform", -250, 250, 10)
 			#self.add_discrete_features(features, distance_to_facing_platform, "distance_to_facing_platform", -250, 250, 10)
 		

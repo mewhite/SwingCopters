@@ -75,20 +75,12 @@ class SwingCopters:
             time.sleep(SC.frame_time)
     
     def run_qlearning_player(self):
-        full_mobility = True
-
         self.game_state.update_state(True)
         game_player = QLearningPlayer()
         while 1:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
-            if not full_mobility:
-                if self.game_state.frame_count % 10 == 0:
-                    action = game_player.get_action(self.game_state)  
-                else:
-                    action = False
-            else:
-                action = game_player.get_action(self.game_state) 
+            action = game_player.get_action(self.game_state)
             prev_game_state = deepcopy(self.game_state)
             self.game_state.update_state(action)
             reward = 0
