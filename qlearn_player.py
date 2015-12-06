@@ -13,10 +13,10 @@ class QLearningPlayer:
 		self.step_size = step_size
 		self.discount = discount
 
-	def add_discrete_features(self, value, feature_name, start, end, increment):
-		temp_name = feature_name + "_-"
+	def add_discrete_features(self, features, value, feature_name, start, end, increment):
 		if value < start:
-			self.features[temp_name] = 1
+			temp_name = feature_name + "_-"
+			features[temp_name] = 1
 		else:
 			self.features[temp_name] = 0
 
@@ -24,17 +24,17 @@ class QLearningPlayer:
 		if value > end:
 			features[temp_name] = 1
 		else:
-			self.features[temp_name] = 0
+			features[temp_name] = 0
 
 		for i in range(int((end - start) / increment)):
-			temp_name = feature_name + "_" + str(i)
+			temp_name = feature_name + "_" + str(start + (increment * i))
 			if value > start + (increment * i) and value < start + (increment * (i + 1)):
-				self.features[temp_name] = 1
+				features[temp_name] = 1
 			else:
-				self.features[temp_name] = 0
+				features[temp_name] = 0
 
 	def extract_features_from_state(self, game_state):
-		self.features = {}
+		features = {}
 
 		player = game_state.player
 		platforms = game_state.platforms
@@ -62,7 +62,7 @@ class QLearningPlayer:
 			#self.add_discrete_features(features, distance_to_left_platform, "distance_to_left_platform", -250, 250, 10)
 			#self.add_discrete_features(features, distance_to_facing_platform, "distance_to_facing_platform", -250, 250, 10)
 		
-		#self.add_discrete_features(features, game_state.player.velocity, "player_velocity", -5, 5, 1)
+		self.add_discrete_features(features, game_state.player.velocity, "player_velocity", -5, 5, 1)
 		
 		distance_to_left_edge = player.x
 		distance_to_right_edge = SC.screen_width - player.x - player.width
@@ -74,7 +74,7 @@ class QLearningPlayer:
 		else:
 			distance_to_facing_edge = distance_to_left_edge
 		#self.add_discrete_features(features, distance_to_facing_edge, "distance_to_facing_edge", 0, 200, 10)
-		return self.features
+		return features
 
 	def estimate_state_score(self, game_state, action):
 		next_state = deepcopy(game_state)
@@ -117,7 +117,7 @@ class QLearningPlayer:
 			if verbose:
 				print "weights before: " + str(self.weights)
 				print "feture value: " + str(value)
-			self.weights[feature] -= self.step_size * residual * value
+			#self.weights[feature] -= self.step_size * residual * value
 			if verbose:
 				print "weights after: " + str(self.weights)
 		self.normalize_weights()
