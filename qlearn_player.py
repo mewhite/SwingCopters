@@ -17,9 +17,14 @@ class QLearningPlayer:
 		if value < start:
 			temp_name = feature_name + "_-"
 			features[temp_name] = 1
+		else:
+			self.features[temp_name] = 0
+
+		temp_name = feature_name + "_+"
 		if value > end:
-			temp_name = feature_name + "_+"
 			features[temp_name] = 1
+		else:
+			features[temp_name] = 0
 
 		for i in range(int((end - start) / increment)):
 			temp_name = feature_name + "_" + str(start + (increment * i))
@@ -48,7 +53,10 @@ class QLearningPlayer:
 			distance_to_gap = player.x + (player.width / 2) - gap_location
 			distance_to_closest_platform = min(distance_to_left_platform, distance_to_right_platform)
 
-			self.add_discrete_features(features, distance_to_gap, "distance_to_gap", -500, 500, 20)
+
+			distance_to_gap_times_acc = distance_to_gap * player.acceleration
+			self.add_discrete_features(distance_to_gap_times_acc, "distance_to_gap_times_acc", -500, 500, 10)
+
 			#self.add_discrete_features(features, distance_to_left_platform, "distance_to_left_platform", -250, 250, 10)
 			#self.add_discrete_features(features, distance_to_facing_platform, "distance_to_facing_platform", -250, 250, 10)
 		
