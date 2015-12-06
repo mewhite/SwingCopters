@@ -13,23 +13,23 @@ class QLearningPlayer:
 		self.step_size = step_size
 		self.discount = discount
 
-	def add_discrete_features(self, features, value, feature_name, start, end, increment):
+	def add_discrete_features(self, value, feature_name, start, end, increment):
 		if value < start:
 			temp_name = feature_name + "_-"
-			features[temp_name] = 1
+			self.features[temp_name] = 1
 		if value > end:
 			temp_name = feature_name + "_+"
 			features[temp_name] = 1
 
-		for i in range(int((start + end) / increment)):
+		for i in range(int((end - start) / increment)):
 			temp_name = feature_name + "_" + str(i)
 			if value > start + (increment * i) and value < start + (increment * (i + 1)):
-				features[temp_name] = 1
+				self.features[temp_name] = 1
 			else:
-				features[temp_name] = 0
+				self.features[temp_name] = 0
 
 	def extract_features_from_state(self, game_state):
-		features = {}
+		self.features = {}
 
 		player = game_state.player
 		platforms = game_state.platforms
@@ -43,12 +43,16 @@ class QLearningPlayer:
 			if player.acceleration > 0:
 				distance_to_facing_platform = distance_to_right_platform
 			else:
-				distance_to_facing_platform = distance_to_left_platform				
+				distance_to_facing_platform = distance_to_left_platform
+			gap_location = right_platform.x - (SC.platform_gap_size / 2)
+			distance_to_gap = player.x + (player.width / 2) - gap_location
 			distance_to_closest_platform = min(distance_to_left_platform, distance_to_right_platform)
-			self.add_discrete_features(features, distance_to_closest_platform, "distance_to_closest_platform", -250, 250, 10)
-			self.add_discrete_features(features, distance_to_facing_platform, "distance_to_facing_platform", -250, 250, 10)
+
+			self.add_discrete_features(distance_to_gap, "distance_to_gap", -500, 500, 1)
+			#self.add_discrete_features(features, distance_to_left_platform, "distance_to_left_platform", -250, 250, 10)
+			#self.add_discrete_features(features, distance_to_facing_platform, "distance_to_facing_platform", -250, 250, 10)
 		
-		self.add_discrete_features(features, game_state.player.velocity, "player_velocity", -5, 5, 1)
+		#self.add_discrete_features(features, game_state.player.velocity, "player_velocity", -5, 5, 1)
 		
 		distance_to_left_edge = player.x
 		distance_to_right_edge = SC.screen_width - player.x - player.width
@@ -59,8 +63,8 @@ class QLearningPlayer:
 			distance_to_facing_edge = distance_to_right_edge
 		else:
 			distance_to_facing_edge = distance_to_left_edge
-		self.add_discrete_features(features, distance_to_facing_edge, "distance_to_facing_edge", 0, 200, 10)
-		return features
+		#self.add_discrete_features(features, distance_to_facing_edge, "distance_to_facing_edge", 0, 200, 10)
+		return self.features
 
 	def estimate_state_score(self, game_state, action):
 		next_state = deepcopy(game_state)
@@ -78,15 +82,14 @@ class QLearningPlayer:
 		else:
 			valueTrue = self.estimate_state_score(game_state, True)
 			valueFalse = self.estimate_state_score(game_state, False)
-			if valueTrue != valueFalse:
-				print "Diff!!!"
 			return valueTrue > valueFalse
 
 	def normalize_weights(self):
-		max_feature_weight = abs(self.weights.most_common(1)[0][1])
-		if max_feature_weight > 0:
-			for feature,value in self.weights.most_common():
-				self.weights[feature] /= max_feature_weight
+		if self.weights:
+			max_feature_weight = abs(self.weights.most_common(1)[0][1])
+			if max_feature_weight > 0:
+				for feature,value in self.weights.most_common():
+					self.weights[feature] /= max_feature_weight
 
 	def incorporate_feedback(self, game_state, action, reward, next_game_state):
 		verbose = False

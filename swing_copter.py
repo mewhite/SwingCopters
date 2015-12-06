@@ -93,6 +93,7 @@ class SwingCopters:
             self.game_state.update_state(action)
             reward = 0
             if self.game_state.game_over:
+                print game_player.weights
                 print "game over"
                 reward = -10
                 game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
