@@ -4,7 +4,7 @@ Created on Sun Nov 01 18:02:00 2015
 
 @author: Nolan
 """
-
+import numpy
 from swing_copter import SwingCopters
 from swing_copter_constants import SC
 
@@ -20,7 +20,7 @@ print "MCTS number of charges: " + str(SC.mcts_num_charges)
 
 average_score =  sum(scores) / ( len(scores) + 0.0 )
 print "Average Score: " + str(average_score)
-st_dev = sum([(scores[i] - average_score) for i in range(len(scores))]) / (len(scores) + 0.0)
+st_dev = numpy.std(scores)
 print "Standard Deviation: " + str(st_dev)
 print "Max Score: " + str(max(scores))
 print "Min Score: " + str(min(scores))
