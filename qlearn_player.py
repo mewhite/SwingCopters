@@ -58,37 +58,61 @@ class QLearningPlayer:
 			else:
 				x_distance_to_facing_platform = x_distance_to_left_platform
 			gap_center = right_platform.x - (SC.platform_gap_size / 2.0)
+			gap_left = gap_center - SC.platform_gap_size / 2.0
+			gap_right = gap_center + SC.platform_gap_size / 2.0
 			x_distance_to_gap = player.x + (player.width / 2.0) - gap_center
 			x_distance_to_closest_platform = min(x_distance_to_left_platform, x_distance_to_right_platform)
-			y_distance_to_platforms = right_platform.y - player.y
+			y_distance_to_platforms = player.y - (right_platform.y + right_platform.default_height)
 
-
-			x_dist_sign = 1
-			if x_distance_to_gap < 0 : x_dist_sign = -1
-			signed_distance_to_gap =  x_dist_sign * math.sqrt(x_distance_to_gap*x_distance_to_gap + y_distance_to_platforms*y_distance_to_platforms)
+			x_dist_to_gap_sign = 1
+			if x_distance_to_gap < 0 : x_dist_to_gap_sign = -1
+			signed_distance_to_gap =  x_dist_to_gap_sign * math.sqrt(x_distance_to_gap*x_distance_to_gap + y_distance_to_platforms*y_distance_to_platforms)
 			signed_distance_to_gap_times_acc = signed_distance_to_gap * player.acceleration
 			#self.add_discrete_features(features, signed_distance_to_gap_times_acc, "signed_distance_to_gap_times_acc", -center, center, 20)
 
 
 			x_distance_to_gap_times_acc = x_distance_to_gap * player.acceleration
 			#self.add_discrete_features(features, x_distance_to_gap_times_acc, "x_distance_to_gap_times_acc", -500, 500, 20)
+			steps = 10
 			def get_y_dist_needed_to_get_to_gap():
-				x_i = game_state.player.x
-				v_i = game_state.player.velocity
+				x_i = game_state.player.x + .5 * game_state.player.acceleration * steps * steps + game_state.player.velocity * steps
+				v_i = game_state.player.velocity + game_state.player.acceleration * steps
+				v_y_i = SC.platform_velocity
+				#if player is within gap space, no time or vertical distance is needed to get within the gap space
+				"""if gap_center - SC.platform_gap_size / 2.0 < x_i and x_i + game_state.player.width < gap_right:
+					return 0"""
+
+				#if player is to the right of the gap, we want to ensure he can make it past the right platform
 				if x_i + game_state.player.width / 2.0 > gap_center:
-					platform_to_pass = "right_platform"
 					x_i = x_i + game_state.player.width
 					acc = -SC.initial_player_accel
-				else:
-					platform_to_pass = "left_platform"
-					acc = SC.initial_player_accel
-				if platform_to_pass == "right_wall":
 					x_f = gap_center + SC.platform_gap_size / 2.0
 				else:
+					acc = SC.initial_player_accel
 					x_f = gap_center - SC.platform_gap_size / 2.0
-					return SC.screen_width - x_f
-				else:
-					return x_f
+				x_f = gap_center
+				x_i = game_state.player.x + game_state.player.width / 2
+				if gap_center - 50 < x_i and x_i < gap_center + 50:
+					return 0
+				time_needed = -1 * v_i - math.sqrt(v_i * v_i - 2 * acc * (x_i - x_f)) / acc
+				if time_needed < 0:
+					time_needed = -1 * v_i + math.sqrt(v_i * v_i - 2 * acc * (x_i - x_f)) / acc
+				y_dist = v_y_i * time_needed
+				return y_dist
+
+			y_dist_needed_to_make_gap = get_y_dist_needed_to_get_to_gap()
+			#print "y dist have - needed: " + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
+			if y_distance_to_platforms - y_dist_needed_to_make_gap < 10:
+				print "here"
+				features["not_enough_time_to_make_gap"] = 1
+				#label = "extra_space_" + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
+				#features[label] = .1
+
+
+			acc_towards_gap = (x_dist_to_gap_sign * game_state.player.acceleration < 0)
+			"""if acc_towards_gap:
+				features["acc_towards_gap_when_needed"] = 1
+"""
 
 		if not player.velocity == 0:
 			dist_to_edge = player.x - SC.screen_width  #(signed_distance from right wall)
@@ -198,6 +222,8 @@ class QLearningPlayer:
 		
 		score = 0
 		for feature, value in features.iteritems():
+			if verbose:
+				print "feature: " + str(feature)
 			score += value * self.weights[feature]
 
 		return score
@@ -207,7 +233,9 @@ class QLearningPlayer:
 		if random.random() < self.exploration_prob:
 			return random.choice(actions)
 		else:
+			#print "Change direction"
 			valueTrue = self.estimate_state_score(game_state, True, verbose=True)
+			#print "Don't change"
 			valueFalse = self.estimate_state_score(game_state, False, verbose=True)
 			#if valueTrue != valueFalse:
 			#	print "Diff!!!"

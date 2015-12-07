@@ -73,6 +73,7 @@ class SwingCopters:
                     self.restart()
             self.draw_state()
             time.sleep(SC.frame_time)
+            print self.game_state.player.x
     
     def run_qlearning_player(self):
         self.game_state.update_state(True)
