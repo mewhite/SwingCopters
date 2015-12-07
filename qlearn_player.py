@@ -57,8 +57,8 @@ class QLearningPlayer:
 				x_distance_to_facing_platform = x_distance_to_right_platform
 			else:
 				x_distance_to_facing_platform = x_distance_to_left_platform
-			gap_location = right_platform.x - (SC.platform_gap_size / 2)
-			x_distance_to_gap = player.x + (player.width / 2) - gap_location
+			gap_center = right_platform.x - (SC.platform_gap_size / 2.0)
+			x_distance_to_gap = player.x + (player.width / 2.0) - gap_center
 			x_distance_to_closest_platform = min(x_distance_to_left_platform, x_distance_to_right_platform)
 			y_distance_to_platforms = right_platform.y - player.y
 
@@ -72,21 +72,23 @@ class QLearningPlayer:
 
 			x_distance_to_gap_times_acc = x_distance_to_gap * player.acceleration
 			#self.add_discrete_features(features, x_distance_to_gap_times_acc, "x_distance_to_gap_times_acc", -500, 500, 20)
-			use_discretized_distance_to_gap_times_acc = False
-			if use_discretized_distance_to_gap_times_acc:
-				if (y_distance_to_platforms < 20):
-					self.add_discrete_features(features, x_distance_to_gap_times_acc, "y<20_x_distance_to_gap_times_acc", -500, 500, 50)
-				if (20 <= y_distance_to_platforms < 50):
-					self.add_discrete_features(features, x_distance_to_gap_times_acc, "y<50_x_distance_to_gap_times_acc", -500, 500, 50)
-				if (50 <= y_distance_to_platforms < 100):
-					self.add_discrete_features(features, x_distance_to_gap_times_acc, "y<100_x_distance_to_gap_times_acc", -500, 500, 50)
-				if (100 <= y_distance_to_platforms < 200):
-					self.add_discrete_features(features, x_distance_to_gap_times_acc, "y<200_x_distance_to_gap_times_acc", -500, 500, 50)
-				if (200 <= y_distance_to_platforms < 500):
-					self.add_discrete_features(features, x_distance_to_gap_times_acc, "y<500_x_distance_to_gap_times_acc", -500, 500, 50)
-				if (500 <= y_distance_to_platforms):
-					self.add_discrete_features(features, x_distance_to_gap_times_acc, "y>500_x_distance_to_gap_times_acc", -500, 500, 50)
-
+			def get_y_dist_needed_to_get_to_gap():
+				x_i = game_state.player.x
+				v_i = game_state.player.velocity
+				if x_i + game_state.player.width / 2.0 > gap_center:
+					platform_to_pass = "right_platform"
+					x_i = x_i + game_state.player.width
+					acc = -SC.initial_player_accel
+				else:
+					platform_to_pass = "left_platform"
+					acc = SC.initial_player_accel
+				if platform_to_pass == "right_wall":
+					x_f = gap_center + SC.platform_gap_size / 2.0
+				else:
+					x_f = gap_center - SC.platform_gap_size / 2.0
+					return SC.screen_width - x_f
+				else:
+					return x_f
 
 		if not player.velocity == 0:
 			dist_to_edge = player.x - SC.screen_width  #(signed_distance from right wall)
@@ -95,16 +97,6 @@ class QLearningPlayer:
 			dist_to_edge_over_vel_times_acc = dist_to_edge / player.velocity
 			#self.add_discrete_features(features, dist_to_edge_over_vel_times_acc, "dist_to_edge_over_vel_times_acc", -400, 400, 50)
 			use_discretized_dist_to_edge_over_vel_times_acc = False
-			if use_discretized_dist_to_edge_over_vel_times_acc:
-				if (-50 <= dist_to_edge < 0):
-					self.add_discrete_features(features, dist_to_edge_over_vel_times_acc, "<-50_dist_to_edge_over_vel_times_acc", -500, 500, 50)
-				if (0 <= dist_to_edge < 50):
-					self.add_discrete_features(features, dist_to_edge_over_vel_times_acc, "50_dist_to_edge_over_vel_times_acc", -500, 500, 50)
-				if (-100 <= dist_to_edge < -50):
-					self.add_discrete_features(features, dist_to_edge_over_vel_times_acc, "<-100_dist_to_edge_over_vel_times_acc", -500, 500, 50)
-				if (50 <= dist_to_edge < 100):
-					self.add_discrete_features(features, dist_to_edge_over_vel_times_acc, "100_dist_to_edge_over_vel_times_acc", -500, 500, 50)
-				
 
 			x_distance_to_gap_times_vel_times_acc = x_distance_to_gap * player.acceleration
 			#self.add_discrete_features(features, x_distance_to_gap_times_acc, "x_distance_to_gap_times_acc", -500, 500, 20)
@@ -193,21 +185,7 @@ class QLearningPlayer:
 			features["too_late_to_stop_by_wall"] = 1
 
 
-		def get_y_dist_needed_to_get_to_gap():
-			x_i = game_state.player.x
-			v_i = game_state.player.velocity
-			if v_i > 0:
-				wall_to_avoid = "right_wall"
-				x_i = x_i + game_state.player.width
-				acc = -SC.initial_player_accel
-			else:
-				wall_to_avoid = "left_wall"
-				acc = SC.initial_player_accel
-			x_f = -1 * v_i * v_i / (2 * acc) + x_i
-			if wall_to_avoid == "right_wall":
-				return SC.screen_width - x_f
-			else:
-				return x_f
+
 
 
 
