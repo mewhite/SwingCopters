@@ -14,11 +14,11 @@ class QLearningPlayer:
 		self.discount = discount
 
 	def add_discrete_features(self, features, value, feature_name, start, end, increment):
+		temp_name = feature_name + "_-"
 		if value < start:
-			temp_name = feature_name + "_-"
 			features[temp_name] = 1
 		else:
-			self.features[temp_name] = 0
+			features[temp_name] = 0
 
 		temp_name = feature_name + "_+"
 		if value > end:
@@ -34,7 +34,7 @@ class QLearningPlayer:
 				features[temp_name] = 0
 
 	def extract_features_from_state(self, game_state):
-		features = {}
+		self.features = {}
 
 		player = game_state.player
 		platforms = game_state.platforms
@@ -55,7 +55,7 @@ class QLearningPlayer:
 
 
 			distance_to_gap_times_acc = distance_to_gap * player.acceleration
-			self.add_discrete_features(distance_to_gap_times_acc, "distance_to_gap_times_acc", -500, 500, 10)
+			self.add_discrete_features(features, distance_to_gap_times_acc, "distance_to_gap_times_acc", -500, 500, 10)
 
 			#self.add_discrete_features(features, distance_to_left_platform, "distance_to_left_platform", -250, 250, 10)
 			#self.add_discrete_features(features, distance_to_facing_platform, "distance_to_facing_platform", -250, 250, 10)
@@ -115,7 +115,7 @@ class QLearningPlayer:
 			if verbose:
 				print "weights before: " + str(self.weights)
 				print "feture value: " + str(value)
-			#self.weights[feature] -= self.step_size * residual * value
+			self.weights[feature] -= self.step_size * residual * value
 			if verbose:
 				print "weights after: " + str(self.weights)
 		self.normalize_weights()
