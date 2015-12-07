@@ -26,17 +26,37 @@ class GameState:
         p_rect = self.player.player_rect
         if p_rect.left < 0 or p_rect.right > SC.screen_width:
             return True
-        
+
         for platform in self.platforms:
             if p_rect.colliderect(platform.rect):
                 return True
-                
+
         for hammer in self.hammers:
             if p_rect.colliderect(hammer.collision_rect):
                 return True
-                
+
         return False
     
+    def get_collider(self):      
+        p_rect = self.player.player_rect
+        if p_rect.left < 0:
+            return "left_wall"
+        if p_rect.right > SC.screen_width:
+            return "right_wall"
+
+        for platform in self.platforms:
+            if p_rect.colliderect(platform.rect):
+                if platform.x <= 0:
+                    return "left_platform"
+                if platform.x + Platform.default_width >= SC.screen_width:
+                    return "right_platform"
+
+        for hammer in self.hammers:
+            if p_rect.colliderect(hammer.collision_rect):
+                return "hammer"
+
+        return False
+
     def create_platforms(self):
         platform_x = random.randint(SC.platform_range[0], SC.platform_range[1])
 

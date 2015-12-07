@@ -26,7 +26,7 @@ class SwingCopters:
         if self.display_game:
             self.screen = pygame.display.set_mode(SC.screen_size)
 
-        player = Player(SC.player_start_pos, 0, 0)
+        player = Player(SC.player_start_pos, SC.initial_player_accel, 0)
         platforms = deque()
         hammers = deque()
         
@@ -42,7 +42,7 @@ class SwingCopters:
         return is_input
                         
     def restart(self):
-        player = Player(SC.player_start_pos, 0, 0)
+        player = Player(SC.player_start_pos, SC.initial_player_accel, 0)
         platforms = deque()
         hammers = deque()
         self.game_state = game_state.GameState(player, platforms, hammers, 0, False)
@@ -77,6 +77,7 @@ class SwingCopters:
     def run_qlearning_player(self):
         self.game_state.update_state(True)
         game_player = QLearningPlayer()
+        self.game_state.player.acceleration = 1
         while 1:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
@@ -92,6 +93,18 @@ class SwingCopters:
                 self.restart()
             else:
                 game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
+            self.draw_state()
+
+    def simulate_game_from_state(self,game_state):
+        self.game_state = game_state
+        while 1:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: sys.exit()
+            action = False
+            prev_game_state = deepcopy(self.game_state)
+            self.game_state.update_state(action)
+            if self.game_state.game_over:
+                return self.game_state.get_collider()
             self.draw_state()
 
     def run_mcts_player(self, num_games=10):
