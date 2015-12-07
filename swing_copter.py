@@ -15,6 +15,7 @@ from copy import deepcopy
 from swing_copter_constants import SC
 from qlearn_player import QLearningPlayer
 import mcts
+import math
 
 class SwingCopters:
 
@@ -73,8 +74,35 @@ class SwingCopters:
                     self.restart()
             self.draw_state()
             time.sleep(SC.frame_time)
-            print self.game_state.player.x
-    
+            if self.game_state.platforms:
+                x_i = self.game_state.player.x
+                v_i = self.game_state.player.velocity
+                v_y_i = SC.platform_velocity
+                #if player is within gap space, no time or vertical distance is needed to get within the gap space
+                """if gap_center - SC.platform_gap_size / 2.0 < x_i and x_i + self.game_state.player.width < gap_right:
+                    return 0"""
+
+                gap_center = self.game_state.platforms[1].x - SC.platform_gap_size / 2.0
+                #if player is to the right of the gap, we want to ensure he can make it past the right platform
+                if x_i + self.game_state.player.width / 2.0 > gap_center:
+                    x_i = x_i + self.game_state.player.width
+                    acc = -SC.initial_player_accel
+                    x_f = gap_center + SC.platform_gap_size / 2.0
+                else:
+                    acc = SC.initial_player_accel
+                    x_f = gap_center - SC.platform_gap_size / 2.0
+                x_f = gap_center
+                x_i = self.game_state.player.x + self.game_state.player.width / 2
+
+                time_needed = (-1 * v_i - math.sqrt(v_i * v_i - 2 * acc * (x_i - x_f))) / acc
+                if time_needed < 0:
+                    time_needed = (-1 * v_i + math.sqrt(v_i * v_i - 2 * acc * (x_i - x_f))) / acc
+                y_dist = v_y_i * time_needed
+                print y_dist
+                print "X dist: " + str(x_i - x_f) + "; v_i: " + str(v_i) + "; acc: " + str(acc)
+
+
+
     def run_qlearning_player(self):
         self.game_state.update_state(True)
         game_player = QLearningPlayer()
@@ -91,6 +119,7 @@ class SwingCopters:
                 print "game over"
                 reward = -10
                 game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)
+                print game_player.weights
                 self.restart()
             else:
                 game_player.incorporate_feedback(prev_game_state, action, reward, self.game_state)

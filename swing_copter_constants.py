@@ -5,7 +5,7 @@ class SC:
     player_start_pos = (screen_width / 2, screen_height * 4/5)
     platform_velocity = 1
     initial_player_accel = 0.3
-    background = 255, 255, 255
+    background = 61, 186, 234
     score_color = 0, 0, 0
     frame_time = 0.01
     platform_gap_size = 318

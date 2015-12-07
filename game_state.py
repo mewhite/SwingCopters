@@ -10,7 +10,7 @@ from hammer import Hammer
 import random
 from swing_copter_constants import SC
 from copy import deepcopy
-
+import random
 
 class GameState:
     def __init__(self, player, platforms, hammers, frame_count, game_over=False, score=0):
@@ -73,11 +73,11 @@ class GameState:
         self.platforms.append(first_platform)
         second_platform = Platform(platform_position2, SC.platform_velocity)
         self.platforms.append(second_platform)
-        """
+        
         first_hammer = Hammer(hammer_position1, SC.platform_velocity)
         self.hammers.append(first_hammer)
         second_hammer = Hammer(hammer_position2, SC.platform_velocity)
-        self.hammers.append(second_hammer)"""
+        self.hammers.append(second_hammer)
 
     def update_positions(self):        
         self.player.update_position()
@@ -107,6 +107,7 @@ class GameState:
             else:
                 self.player.change_acceleration()
             self.frozen_frames += SC.frozen_frames_after_input + 1
+            #self.frozen_frames += random.randint(SC.frozen_frames_after_input - 5, SC.frozen_frames_after_input + 50)
 
         self.update_positions()
 

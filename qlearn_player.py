@@ -64,127 +64,34 @@ class QLearningPlayer:
 			x_distance_to_closest_platform = min(x_distance_to_left_platform, x_distance_to_right_platform)
 			y_distance_to_platforms = player.y - (right_platform.y + right_platform.default_height)
 
-			x_dist_to_gap_sign = 1
-			if x_distance_to_gap < 0 : x_dist_to_gap_sign = -1
-			signed_distance_to_gap =  x_dist_to_gap_sign * math.sqrt(x_distance_to_gap*x_distance_to_gap + y_distance_to_platforms*y_distance_to_platforms)
-			signed_distance_to_gap_times_acc = signed_distance_to_gap * player.acceleration
-			#self.add_discrete_features(features, signed_distance_to_gap_times_acc, "signed_distance_to_gap_times_acc", -center, center, 20)
-
-
-			x_distance_to_gap_times_acc = x_distance_to_gap * player.acceleration
-			#self.add_discrete_features(features, x_distance_to_gap_times_acc, "x_distance_to_gap_times_acc", -500, 500, 20)
-			steps = 10
-			def get_y_dist_needed_to_get_to_gap():
-				x_i = game_state.player.x + .5 * game_state.player.acceleration * steps * steps + game_state.player.velocity * steps
-				v_i = game_state.player.velocity + game_state.player.acceleration * steps
-				v_y_i = SC.platform_velocity
-				#if player is within gap space, no time or vertical distance is needed to get within the gap space
-				"""if gap_center - SC.platform_gap_size / 2.0 < x_i and x_i + game_state.player.width < gap_right:
-					return 0"""
-
-				#if player is to the right of the gap, we want to ensure he can make it past the right platform
-				if x_i + game_state.player.width / 2.0 > gap_center:
+			def get_stopping_dist_from_platform():
+				x_i = game_state.player.x
+				v_i = game_state.player.velocity
+				if v_i > 0:
+					platform_to_avoid = "right"
 					x_i = x_i + game_state.player.width
 					acc = -SC.initial_player_accel
-					x_f = gap_center + SC.platform_gap_size / 2.0
 				else:
+					platform_to_avoid = "left"
 					acc = SC.initial_player_accel
-					x_f = gap_center - SC.platform_gap_size / 2.0
-				x_f = gap_center
-				x_i = game_state.player.x + game_state.player.width / 2
-				if gap_center - 50 < x_i and x_i < gap_center + 50:
-					return 0
-				time_needed = -1 * v_i - math.sqrt(v_i * v_i - 2 * acc * (x_i - x_f)) / acc
-				if time_needed < 0:
-					time_needed = -1 * v_i + math.sqrt(v_i * v_i - 2 * acc * (x_i - x_f)) / acc
-				y_dist = v_y_i * time_needed
-				return y_dist
+				x_f = -1 * v_i * v_i / (2 * acc) + x_i
+				if platform_to_avoid == "right":
+					return right_platform.x - x_f
+				else:
+					return x_f - (left_platform.x + SC.platform_width)
+			stopping_dist_from_platform = get_stopping_dist_from_platform()
+			if stopping_dist_from_platform < 4:# and y_distance_to_platforms > 0:
+				features["too_late_to_stop_by_platform"] = 1
+			if stopping_dist_from_platform < 10:# and y_distance_to_platforms > 0:
+				features["<10_to_stop_by_platform"] = 1
+			if stopping_dist_from_platform < 20:# and y_distance_to_platforms > 0:
+				features["<20_to_stop_by_platform"] = 1
+			if stopping_dist_from_platform < 50:# and y_distance_to_platforms > 0:
+				features["<50_to_stop_by_platform"] = 1
+			if stopping_dist_from_platform < 100:# and y_distance_to_platforms > 0:
+				features["<100_to_stop_by_platform"] = 1
 
-			y_dist_needed_to_make_gap = get_y_dist_needed_to_get_to_gap()
-			#print "y dist have - needed: " + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
-			if y_distance_to_platforms - y_dist_needed_to_make_gap < 10:
-				print "here"
-				features["not_enough_time_to_make_gap"] = 1
-				#label = "extra_space_" + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
-				#features[label] = .1
-
-
-			acc_towards_gap = (x_dist_to_gap_sign * game_state.player.acceleration < 0)
-			"""if acc_towards_gap:
-				features["acc_towards_gap_when_needed"] = 1
-"""
-
-		if not player.velocity == 0:
-			dist_to_edge = player.x - SC.screen_width  #(signed_distance from right wall)
-			if player.x < x_distance_to_right_edge:
-				dist_to_edge = player.x
-			dist_to_edge_over_vel_times_acc = dist_to_edge / player.velocity
-			#self.add_discrete_features(features, dist_to_edge_over_vel_times_acc, "dist_to_edge_over_vel_times_acc", -400, 400, 50)
-			use_discretized_dist_to_edge_over_vel_times_acc = False
-
-			x_distance_to_gap_times_vel_times_acc = x_distance_to_gap * player.acceleration
-			#self.add_discrete_features(features, x_distance_to_gap_times_acc, "x_distance_to_gap_times_acc", -500, 500, 20)
-			
-			#self.add_discrete_features(features, signed_distance_to_gap, "signed_distance_to_gap", -center, center, 20)
-
-			x_distance_to_gap_times_acc_times_vel = x_distance_to_gap * player.acceleration * player.velocity
-			#self.add_discrete_features(features, x_distance_to_gap_times_acc_times_vel, "x_distance_to_gap_times_acc_times_vel", -1500, 1500, 100)
-			#self.add_discrete_features(features, x_distance_to_left_platform, "x_distance_to_left_platform", -250, 250, 10)
-			#self.add_discrete_features(features, x_distance_to_facing_platform, "x_distance_to_facing_platform", -250, 250, 10)
-
-		#self.add_discrete_features(features, abs_velocity, "abs_velocity", 0, 5, .5)
-
-		vel_times_accel = player.velocity * player.acceleration
-		#self.add_discrete_features(features, vel_times_accel, "vel_times_accel", -5, 5, .5)
-
-		#self.add_discrete_features(features, x_distance_to_closest_edge, "x_distance_to_closest_edge", 0, 200, 10)
-
-		dist_from_center = center - player.x
-		dist_from_center_times_vel_times_acc = dist_from_center * player.velocity * player.acceleration
-		#self.add_discrete_features(features, dist_from_center_times_vel_times_acc, "dist_from_center_times_vel_times_acc", -center * 5, center * 5, 100)
-
-
-		if player.acceleration > 0:
-			x_distance_to_facing_edge = x_distance_to_right_edge
-		else:
-			x_distance_to_facing_edge = x_distance_to_left_edge
-		#self.add_discrete_features(features, x_distance_to_facing_edge, "x_distance_to_facing_edge", 0, 200, 10)
-
-
-		def simulate_game_from_state(start_game_state):
-			game_state = start_game_state
-			while 1:
-				for event in pygame.event.get():
-					if event.type == pygame.QUIT: sys.exit()
-				action = False
-				prev_game_state = deepcopy(game_state)
-				game_state.update_state(action)
-				if game_state.game_over:
-					return game_state.get_collider()
-
-		def too_late_to_stop_by_wall():
-			#set acceleration to opposition direction and velocity and see if player will avoid hitting wall it's moving towards
-			temp_game_state = deepcopy(game_state)
-			temp_game_state.platforms = []
-			temp_game_state.hammers = []
-			if temp_game_state.player.velocity > 0:
-				wall_to_avoid = "right_wall"
-				temp_game_state.player.x += 5
-				temp_game_state.player.acceleration = -1
-			else:
-				wall_to_avoid = "left_wall"
-				temp_game_state.player.x -= 5
-				temp_game_state.player.acceleration = 1
-			display_game = True
-			collider = simulate_game_from_state(temp_game_state)
-			if collider == wall_to_avoid:
-				return True
-			return False
-
-		"""if too_late_to_stop_by_wall():
-			features["too_late_to_stop_by_wall"] = 1
-		else:
-			features["too_late_to_stop_by_wall"] = 0"""
+			"""stopping_dist_from_hammer = get_stopping_dist_from_hammer"""
 
 		def get_stopping_dist_from_wall():
 			x_i = game_state.player.x
@@ -207,12 +114,55 @@ class QLearningPlayer:
 
 		if stopping_dist_from_wall < 4:
 			features["too_late_to_stop_by_wall"] = 1
+		if stopping_dist_from_wall < 10:
+			features["<10_to_stop_by_wall"] = 1
+		if stopping_dist_from_wall < 50:
+			features["<50_to_stop_by_wall"] = 1
+		if stopping_dist_from_wall < 100:
+			features["<100_to_stop_by_wall"] = 1
+		"""if stopping_dist_from_wall < 500:
+			features["<500_to_stop_by_wall"] = 1"""
 
+		"""if platforms:
+			steps = 5
+			def get_y_dist_needed_to_get_to_gap():
+				x_i = game_state.player.x + .5 * game_state.player.acceleration * steps * steps + game_state.player.velocity * steps
+				v_i = game_state.player.velocity + game_state.player.acceleration * steps
+				v_y_i = SC.platform_velocity
+				#if player is within gap space, no time or vertical distance is needed to get within the gap space
+				if gap_center - SC.platform_gap_size / 2.0 < x_i and x_i + game_state.player.width < gap_right:
+					return 0
+				
+				gap_center = game_state.platforms[1].x - SC.platform_gap_size / 2.0
+				#if player is to the right of the gap, we want to ensure he can make it past the right platform
+				x_i = x_i + game_state.player.width / 2
+				if x_i > gap_center:
+					x_i = x_i + game_state.player.width
+					acc = -SC.initial_player_accel
+					x_f = gap_center + SC.platform_gap_size / 2.0
+				else:
+					acc = SC.initial_player_accel
+					x_f = gap_center - SC.platform_gap_size / 2.0
+				x_f = gap_center
 
-
-
-
-
+				time_needed = (-1 * v_i - math.sqrt(v_i * v_i - 2 * acc * (x_i - x_f))) / acc
+				if time_needed < 0:
+					time_needed = (-1 * v_i + math.sqrt(v_i * v_i - 2 * acc * (x_i - x_f))) / acc
+				y_dist = v_y_i * time_needed
+				return y_dist
+			"""
+			#y_dist_needed_to_make_gap = get_y_dist_needed_to_get_to_gap()
+			#if verbose:
+			#	print "y dist have - needed: " + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
+			#if y_distance_to_platforms - y_dist_needed_to_make_gap < 10 and y_distance_to_platforms > 0:
+			#	features["not_enough_time_to_make_gap"] = 1
+				#label = "extra_space_" + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
+				#features[label] = .1
+			#y_distance_to_escape = player.y + player.height - right_platform.y
+			#if y_distance_to_escape - y_dist_needed_to_make_gap < 0:
+			#	features["not_enough_time_to_escape_gap"] = 1
+				#label = "extra_space_" + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
+				#features[label] = .1
 		return features
 
 	def estimate_state_score(self, game_state, action, verbose=False):
@@ -228,25 +178,39 @@ class QLearningPlayer:
 
 		return score
 
-	def get_action(self, game_state):
-		actions = QLearningPlayer.actions
+	def get_action(self, game_state,verbose=False):
+		actions = game_state.get_actions()
+		if len(actions) == 1:
+			return actions[0]
 		if random.random() < self.exploration_prob:
 			return random.choice(actions)
 		else:
-			#print "Change direction"
-			valueTrue = self.estimate_state_score(game_state, True, verbose=True)
-			#print "Don't change"
-			valueFalse = self.estimate_state_score(game_state, False, verbose=True)
-			#if valueTrue != valueFalse:
-			#	print "Diff!!!"
+			if verbose:
+				print "###################"
+				print "Change direction"
+			valueTrue = self.estimate_state_score(game_state, True, verbose)
+			if verbose:
+				print "Don't change"
+			valueFalse = self.estimate_state_score(game_state, False, verbose)
+			if verbose:
+				if valueTrue > valueFalse:
+					print "Chose to change"
+				else:
+					print "-> Chose not to change"
 			return valueTrue > valueFalse
 
 	def normalize_weights(self):
 		if self.weights:
-			max_feature_weight = abs(self.weights.most_common(1)[0][1])
+			normalizer = 1
+			for feature, value in self.weights.most_common():
+				if abs(value) > normalizer:
+					normalizer = value
+			for feature,value in self.weights.most_common():
+				self.weights[feature] /= normalizer
+			"""max_feature_weight = abs(self.weights.most_common(1)[0][1])
 			if max_feature_weight > 0:
 				for feature,value in self.weights.most_common():
-					self.weights[feature] /= max_feature_weight
+					self.weights[feature] /= max_feature_weight"""
 
 	def incorporate_feedback(self, game_state, action, reward, next_game_state):
 		verbose = False
