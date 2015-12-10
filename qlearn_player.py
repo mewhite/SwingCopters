@@ -91,7 +91,7 @@ class QLearningPlayer:
 			if stopping_dist_from_platform < 100:# and y_distance_to_platforms > 0:
 				features["<100_to_stop_by_platform"] = 1
 
-			"""stopping_dist_from_hammer = get_stopping_dist_from_hammer"""
+			#stopping_dist_from_hammer = get_stopping_dist_from_hammer"""
 
 		def get_stopping_dist_from_wall():
 			x_i = game_state.player.x
@@ -123,17 +123,16 @@ class QLearningPlayer:
 		"""if stopping_dist_from_wall < 500:
 			features["<500_to_stop_by_wall"] = 1"""
 
-		"""if platforms:
+		if platforms:
 			steps = 5
 			def get_y_dist_needed_to_get_to_gap():
 				x_i = game_state.player.x + .5 * game_state.player.acceleration * steps * steps + game_state.player.velocity * steps
 				v_i = game_state.player.velocity + game_state.player.acceleration * steps
 				v_y_i = SC.platform_velocity
+				gap_center = game_state.platforms[1].x - SC.platform_gap_size / 2.0
 				#if player is within gap space, no time or vertical distance is needed to get within the gap space
 				if gap_center - SC.platform_gap_size / 2.0 < x_i and x_i + game_state.player.width < gap_right:
 					return 0
-				
-				gap_center = game_state.platforms[1].x - SC.platform_gap_size / 2.0
 				#if player is to the right of the gap, we want to ensure he can make it past the right platform
 				x_i = x_i + game_state.player.width / 2
 				if x_i > gap_center:
@@ -150,19 +149,12 @@ class QLearningPlayer:
 					time_needed = (-1 * v_i + math.sqrt(v_i * v_i - 2 * acc * (x_i - x_f))) / acc
 				y_dist = v_y_i * time_needed
 				return y_dist
-			"""
-			#y_dist_needed_to_make_gap = get_y_dist_needed_to_get_to_gap()
-			#if verbose:
-			#	print "y dist have - needed: " + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
-			#if y_distance_to_platforms - y_dist_needed_to_make_gap < 10 and y_distance_to_platforms > 0:
-			#	features["not_enough_time_to_make_gap"] = 1
-				#label = "extra_space_" + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
-				#features[label] = .1
-			#y_distance_to_escape = player.y + player.height - right_platform.y
-			#if y_distance_to_escape - y_dist_needed_to_make_gap < 0:
-			#	features["not_enough_time_to_escape_gap"] = 1
-				#label = "extra_space_" + str(y_distance_to_platforms - y_dist_needed_to_make_gap)
-				#features[label] = .1
+			
+			y_dist_needed_to_make_gap = get_y_dist_needed_to_get_to_gap()
+			if y_distance_to_platforms - y_dist_needed_to_make_gap < 10 and y_distance_to_platforms > 0:
+				features["not_enough_time_to_make_gap"] = 1
+
+
 		return features
 
 	def estimate_state_score(self, game_state, action, verbose=False):

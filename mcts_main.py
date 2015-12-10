@@ -1,12 +1,14 @@
+import numpy
 from swing_copter import SwingCopters
 from swing_copter_constants import SC
-import numpy
 
+num_games = SC.mcts_num_games
+print "MCTS max depth charge: " + str(SC.mcts_max_charge_depth)
+print "MCTS number of charges: " + str(SC.mcts_num_charges)
+print "MCTS number of games: " + str(num_games)
 display_game = True
 game = SwingCopters(display_game)
-num_games = 20
-scores = game.run_qlearning_player(num_games)
-
+scores = game.run_mcts_player(num_games)
 print "Scores: " + str(scores)
 print "###############"
 print "Test Settings:"
