@@ -10,8 +10,8 @@ import math
 
 class Player:
     height = 80
-    width = 79
-    image = transform.scale(pygame.image.load("square.png"), (width, height)) 
+    width = 80
+    image = transform.scale(pygame.image.load("orange_square.png"), (width, height)) 
 
     def __init__(self, starting_position, acceleration, velocity):
         self.x = starting_position[0]

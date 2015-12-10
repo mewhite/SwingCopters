@@ -10,7 +10,7 @@ from hammer import Hammer
 import random
 from swing_copter_constants import SC
 from copy import deepcopy
-
+import random
 
 class GameState:
     def __init__(self, player, platforms, hammers, frame_count, game_over=False, score=0):
@@ -26,17 +26,37 @@ class GameState:
         p_rect = self.player.player_rect
         if p_rect.left < 0 or p_rect.right > SC.screen_width:
             return True
-        
+
         for platform in self.platforms:
             if p_rect.colliderect(platform.rect):
                 return True
-                
+
         for hammer in self.hammers:
             if p_rect.colliderect(hammer.collision_rect):
                 return True
-                
+
         return False
     
+    def get_collider(self):      
+        p_rect = self.player.player_rect
+        if p_rect.left < 0:
+            return "left_wall"
+        if p_rect.right > SC.screen_width:
+            return "right_wall"
+
+        for platform in self.platforms:
+            if p_rect.colliderect(platform.rect):
+                if platform.x <= 0:
+                    return "left_platform"
+                if platform.x + Platform.default_width >= SC.screen_width:
+                    return "right_platform"
+
+        for hammer in self.hammers:
+            if p_rect.colliderect(hammer.collision_rect):
+                return "hammer"
+
+        return False
+
     def create_platforms(self):
         platform_x = random.randint(SC.platform_range[0], SC.platform_range[1])
 
@@ -53,11 +73,11 @@ class GameState:
         self.platforms.append(first_platform)
         second_platform = Platform(platform_position2, SC.platform_velocity)
         self.platforms.append(second_platform)
-        """
+        
         first_hammer = Hammer(hammer_position1, SC.platform_velocity)
         self.hammers.append(first_hammer)
         second_hammer = Hammer(hammer_position2, SC.platform_velocity)
-        self.hammers.append(second_hammer)"""
+        self.hammers.append(second_hammer)
 
     def update_positions(self):        
         self.player.update_position()
@@ -87,6 +107,7 @@ class GameState:
             else:
                 self.player.change_acceleration()
             self.frozen_frames += SC.frozen_frames_after_input + 1
+            #self.frozen_frames += random.randint(SC.frozen_frames_after_input - 5, SC.frozen_frames_after_input + 50)
 
         self.update_positions()
 

@@ -11,7 +11,7 @@ from pygame import transform
 class Hammer:
     default_height = 118
     default_width = 64
-    default_image = transform.scale(pygame.image.load("rectangle.png"), (default_width, default_height)) 
+    default_image = transform.scale(pygame.image.load("rectangle.png"), (default_width, default_height))
 
     def __init__(self, starting_position, y_velocity):
         self.x = starting_position[0]
@@ -27,7 +27,8 @@ class Hammer:
         self.width = Hammer.default_width
         self.image = Hammer.default_image
         self.image.set_colorkey((255, 255, 255))
-        self.rect = self.image.get_rect(topleft = starting_position)
+        self.rect = self.image.fill((249, 255, 255, 255))
+        #self.rect = self.image.get_rect(topleft = starting_position)
         self.rotation = 0 #90 is vertical
         
         self.collision_rect = self.rect
