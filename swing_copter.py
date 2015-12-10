@@ -73,9 +73,9 @@ class SwingCopters:
                 self.game_state.update_state(is_input)
                 if self.game_state.game_over:
                     scores.append(self.game_state.frame_count)
+                    print self.game_state.frame_count
                     num_games -= 1
                     if num_games == 0:
-                        print self.game_state.frame_count
                         return scores
                     self.restart()
             self.draw_state()
