@@ -62,7 +62,8 @@ class SwingCopters:
         #self.screen.blit(score_display, (10, 10))
         pygame.display.flip()
         
-    def run_human_player(self):
+    def run_human_player(self, num_games = -1):
+        scores = []
         while 1:
             is_input = self.detect_input()
             if is_input:
@@ -70,6 +71,11 @@ class SwingCopters:
             if self.playing:
                 self.game_state.update_state(is_input)
                 if self.game_state.game_over:
+                    scores.append(self.game_state.frame_count)
+                    num_games -= 1
+                    if num_games == 0:
+                        print self.game_state.frame_count
+                        return scores
                     self.restart()
             self.draw_state()
             time.sleep(SC.frame_time)
